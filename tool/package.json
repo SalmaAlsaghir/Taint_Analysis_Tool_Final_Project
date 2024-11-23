@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/parser": "^7.26.2",
+    "@babel/traverse": "^7.25.9",
+    "@babel/types": "^7.26.0",
+    "esquery": "^1.6.0"
+  }
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
+    "check": "DangerouslySetInnerHTML",
+    "message": "Potential XSS vulnerability: dangerouslySetInnerHTML found.",
+    "line": 49,
+    "column": 11
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
+    "check": "Direct DOM Manipulation",
+    "message": "Potential security risk: Direct DOM manipulation detected.",
+    "line": 20,
+    "column": 4
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
+    "check": "Direct DOM Manipulation",
+    "message": "Potential security risk: Direct DOM manipulation detected.",
+    "line": 64,
+    "column": 25
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
+    "check": "Direct DOM Manipulation",
+    "message": "Potential security risk: Direct DOM manipulation detected.",
+    "line": 66,
+    "column": 10
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/index.js",
+    "check": "Direct DOM Manipulation",
+    "message": "Potential security risk: Direct DOM manipulation detected.",
+    "line": 7,
+    "column": 33
+  }
+]
