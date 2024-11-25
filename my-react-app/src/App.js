@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 
 function App() {
@@ -9,23 +8,23 @@ function App() {
     setUserInput(event.target.value);
   };
 
-  // Potentially dangerous eval usage
+  //dangerous eval usage
   const runDangerousCode = () => {
-    const userCode = userInput; // Assume userInput contains code
-    eval(userCode); // Vulnerable
+    const userCode = userInput; //userInput contains code
+    eval(userCode); //vulnerable
   };
 
   useEffect(() => {
-    // Direct DOM manipulation
+    //Direct DOM manipulation
     document.title = userInput;
   }, [userInput]);
 
-  // setTimeout with string argument
+  //setTimeout with string argument
   const runSetTimeout = () => {
-    setTimeout('alert("This is unsafe!")', 1000); // Vulnerable
+    setTimeout('alert("This is unsafe!")', 1000); //vulnerable
   };
 
-  // Deprecated lifecycle method (simulated in functional component)
+  //deprecated lifecycle method (simulated in functional component)
   useEffect(() => {
     console.warn('componentWillMount equivalent in useEffect');
   }, []);
@@ -39,30 +38,30 @@ function App() {
         type="text"
         onChange={handleInputChange}
         placeholder="Enter text"
-        ref={inputRef} // Insecure ref usage
+        ref={inputRef} //insecure ref usage
       />
 
-      {/* Unsanitized user input in JSX */}
+      {/*unsanitized user input in JSX */}
       <div>{userInput}</div>
 
-      {/* Dangerous use of dangerouslySetInnerHTML */}
+      {/*dangerous use of dangerouslySetInnerHTML */}
       <div dangerouslySetInnerHTML={{ __html: userInput }} />
 
-      {/* Dangerous JavaScript Execution */}
+      {/*dangerous JavaScript Execution */}
       <button onClick={runDangerousCode}>
         Run Dangerous Code
       </button>
 
-      {/* setTimeout with string argument */}
+      {/*setTimeout with string argument */}
       <button onClick={runSetTimeout}>
         Run Unsafe Timeout
       </button>
 
-      {/* Dynamic script inclusion */}
+      {/*dynamic script inclusion */}
       <button
         onClick={() => {
           const script = document.createElement('script');
-          script.src = userInput; // Vulnerable
+          script.src = userInput; //vulnerable
           document.body.appendChild(script);
         }}
       >

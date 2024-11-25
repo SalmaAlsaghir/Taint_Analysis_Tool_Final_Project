@@ -1,5 +1,3 @@
-# indirect_tainting.py
-
 from django.http import HttpResponse
 import sqlite3
 
@@ -10,6 +8,6 @@ def indirect_taint_view(request):
     intermediate_var = user_input
     final_var = intermediate_var
     query = f"SELECT * FROM info WHERE data = '{final_var}'"
-    cursor.execute(query)  # Vulnerable due to indirect tainting
+    cursor.execute(query)  #vulnerable due to indirect tainting
     results = cursor.fetchall()
     return HttpResponse(f"Results: {results}")
