@@ -1,12 +1,10 @@
-// vulnerable_xss.jsx
-
 import React, { useState } from 'react';
 
 function VulnerableXSSComponent() {
   const [userInput, setUserInput] = useState('');
 
   const handleChange = (e) => {
-    setUserInput(e.target.value);  // Tainted data
+    setUserInput(e.target.value);  //tainted data
   };
 
   return (

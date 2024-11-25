@@ -3,35 +3,35 @@
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
     "check": "DangerouslySetInnerHTML",
     "message": "Potential XSS vulnerability: dangerouslySetInnerHTML found.",
-    "line": 49,
+    "line": 48,
     "column": 11
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
     "check": "Eval Usage",
     "message": "Potential security risk: Usage of eval detected.",
-    "line": 15,
+    "line": 14,
     "column": 4
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
     "check": "Direct DOM Manipulation",
     "message": "Potential security risk: Direct DOM manipulation detected.",
-    "line": 20,
+    "line": 19,
     "column": 4
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
     "check": "Unsafe setTimeout",
     "message": "Potential security risk: setTimeout with string argument detected.",
-    "line": 25,
+    "line": 24,
     "column": 4
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
     "check": "Dynamic Script Injection",
     "message": "Potential security risk: Dynamic script src assignment detected.",
-    "line": 65,
+    "line": 64,
     "column": 10
   }
 ]

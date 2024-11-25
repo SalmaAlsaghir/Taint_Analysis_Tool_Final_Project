@@ -32,7 +32,7 @@ class TaintAnalyzer(ast.NodeVisitor):
         self.current_function = None
 
     def visit_Assign(self, node):
-        # Check if the value is tainted
+        #we check if the value is tainted
         value_is_tainted = self.is_tainted(node.value)
         for target in node.targets:
             if isinstance(target, ast.Name):
@@ -44,24 +44,24 @@ class TaintAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node):
-        # Check for sources of taint
+        #check for sources of taint
         if self.is_source(node):
             tainted_var = self.get_assigned_var(node)
             if tainted_var:
                 self.tainted_vars.add(tainted_var)
-        # Check for sinks
+        #check for sinks
         elif self.is_sink(node):
             self.check_for_vulnerabilities(node)
         else:
-            # Handle function calls
+            #function calls
             func_name = self.get_function_name(node)
             if func_name in self.sanitization_functions:
-                # Mark the variable as sanitized
+                #mark the variable as sanitized
                 tainted_var = self.get_assigned_var(node)
                 if tainted_var and tainted_var in self.tainted_vars:
                     self.tainted_vars.remove(tainted_var)
             elif func_name and func_name in self.function_defs:
-                # Visit the function definition
+                #visit the function definition
                 if func_name not in self.visited_functions:
                     self.visited_functions.add(func_name)
                     original_tainted_vars = self.tainted_vars.copy()
@@ -70,7 +70,7 @@ class TaintAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
     def is_source(self, node):
-        # Check for request.GET.get('param') pattern
+        #check for request.GET.get('param') pattern
         if isinstance(node.func, ast.Attribute) and node.func.attr == 'get':
             if isinstance(node.func.value, ast.Attribute) and node.func.value.attr in ('GET', 'POST', 'COOKIES', 'META', 'session'):
                 if isinstance(node.func.value.value, ast.Name) and node.func.value.value.id == 'request':
@@ -78,13 +78,13 @@ class TaintAnalyzer(ast.NodeVisitor):
         return False
 
     def is_sink(self, node):
-        # Check if the call is a sink (e.g., cursor.execute, os.system)
+        #chec if the call is a sink (such asursor.execute, os.system)
         if isinstance(node.func, ast.Attribute):
             if node.func.attr == 'execute' and isinstance(node.func.value, ast.Name) and node.func.value.id == 'cursor':
                 return True
             if node.func.attr in ('system', 'popen', 'spawn', 'call', 'check_output') and isinstance(node.func.value, ast.Name) and node.func.value.id == 'os':
                 return True
-            # Check for deserialization functions like pickle.loads
+            #deserialization functions like pickle.loads
             if isinstance(node.func.value, ast.Name) and node.func.value.id in ('pickle', 'cPickle', 'yaml'):
                 if node.func.attr in ('load', 'loads', 'unsafe_load'):
                     return True
@@ -96,11 +96,11 @@ class TaintAnalyzer(ast.NodeVisitor):
     def check_for_vulnerabilities(self, node):
         vulnerability = self.get_vulnerability_type(node)
         if vulnerability == 'SQL Injection':
-            # Handle SQL Injection differently
+            #handling SQL Injection differently
             if node.args:
                 query_arg = node.args[0]
                 if self.is_tainted(query_arg):
-                    # Query string is tainted - vulnerable
+                    #query string is tainted - vulnerable
                     self.results.append({
                         "file": self.file_path,
                         "check": vulnerability,
@@ -109,7 +109,7 @@ class TaintAnalyzer(ast.NodeVisitor):
                         "column": node.col_offset,
                     })
         else:
-            # For other vulnerabilities, check if any arguments are tainted
+            #other vulnerabilities, check if any arguments are tainted
             for arg in node.args:
                 if self.is_tainted(arg) and not self.is_sanitized(arg):
                     self.results.append({
@@ -126,7 +126,7 @@ class TaintAnalyzer(ast.NodeVisitor):
         elif isinstance(node, ast.BinOp):
             return self.is_tainted(node.left) or self.is_tainted(node.right)
         elif isinstance(node, ast.JoinedStr):
-            # Handle f-strings
+            #f-strings
             for value in node.values:
                 if isinstance(value, ast.FormattedValue):
                     if self.is_tainted(value.value):
@@ -135,9 +135,9 @@ class TaintAnalyzer(ast.NodeVisitor):
         elif isinstance(node, ast.Call):
             func_name = self.get_function_name(node)
             if func_name in self.sanitization_functions:
-                return False  # Data is sanitized
+                return False  #is sanitized
             elif func_name in self.function_defs:
-                # Simplification: Assume function returns tainted data if it uses tainted data
+                #simplification: asume function returns tainted data if it uses tainted data
                 return True
             elif self.is_source(node):
                 return True
@@ -150,11 +150,11 @@ class TaintAnalyzer(ast.NodeVisitor):
         elif isinstance(node, ast.Subscript):
             return self.is_tainted(node.value) or self.is_tainted(node.slice)
         elif isinstance(node, ast.Constant):
-            return False  # Constants are not tainted
+            return False  #constants are not tainted
         return False
 
     def is_sanitized(self, node):
-        # Check if the node represents a call to a sanitization function
+        #check if the node represents a call to a sanitization function
         if isinstance(node, ast.Call):
             func_name = self.get_function_name(node)
             if func_name in self.sanitization_functions:
@@ -197,7 +197,7 @@ class TaintAnalyzer(ast.NodeVisitor):
         return 'Unknown Vulnerability'
 
     def generic_visit(self, node):
-        # Add parent references to nodes
+        #add parent references to nodes
         for child in ast.iter_child_nodes(node):
             child.parent = node
         super().generic_visit(node)

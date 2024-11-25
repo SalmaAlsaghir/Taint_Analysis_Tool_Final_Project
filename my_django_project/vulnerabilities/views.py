@@ -7,19 +7,19 @@ import pickle
 def vulnerable_view(request):
     user_input = request.GET.get('input', '')
 
-    # SQL Injection
+    #SQL Injection
     with connection.cursor() as cursor:
         query = "SELECT * FROM users WHERE username = '%s'" % user_input
         cursor.execute(query)
         results = cursor.fetchall()
 
-    # XSS
+    #XSS
     response = HttpResponse("Welcome %s" % user_input)
 
-    # Command Injection
+    #command Injection
     os.system('echo %s' % user_input)
 
-    # Insecure Deserialization
+    #insecure Deserialization
     data = pickle.loads(user_input)
 
     return response

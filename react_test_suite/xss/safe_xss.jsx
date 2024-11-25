@@ -8,7 +8,7 @@ function SafeXSSComponent() {
 
   const handleChange = (e) => {
     const sanitizedInput = DOMPurify.sanitize(e.target.value);
-    setUserInput(sanitizedInput);  // Sanitized data
+    setUserInput(sanitizedInput);  //sanitized data
   };
 
   return (

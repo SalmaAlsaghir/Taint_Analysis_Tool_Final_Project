@@ -1,16 +1,14 @@
-// vulnerable_eval.jsx
-
 import React, { useState } from 'react';
 
 function VulnerableEvalComponent() {
   const [userInput, setUserInput] = useState('');
 
   const handleChange = (e) => {
-    setUserInput(e.target.value);  // Tainted data
+    setUserInput(e.target.value);  //tainted data
   };
 
   const executeUserCode = () => {
-    eval(userInput);  // Dangerous use of eval
+    eval(userInput);  //dangerous use of eval
   };
 
   return (

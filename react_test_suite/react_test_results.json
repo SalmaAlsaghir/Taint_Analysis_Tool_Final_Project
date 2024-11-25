@@ -3,14 +3,14 @@
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/react_test_suite/eval/vulnerable_eval.jsx",
     "check": "Eval Usage",
     "message": "Potential security risk: Usage of eval detected.",
-    "line": 13,
+    "line": 11,
     "column": 4
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/react_test_suite/xss/vulnerable_xss.jsx",
     "check": "DangerouslySetInnerHTML",
     "message": "Potential XSS vulnerability: dangerouslySetInnerHTML found.",
-    "line": 15,
+    "line": 13,
     "column": 11
   }
 ]
