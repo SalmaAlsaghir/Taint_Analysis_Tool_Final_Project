@@ -8,6 +8,13 @@
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
+    "check": "Eval Usage",
+    "message": "Potential security risk: Usage of eval detected.",
+    "line": 15,
+    "column": 4
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
     "check": "Direct DOM Manipulation",
     "message": "Potential security risk: Direct DOM manipulation detected.",
     "line": 20,
@@ -15,23 +22,16 @@
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
-    "check": "Direct DOM Manipulation",
-    "message": "Potential security risk: Direct DOM manipulation detected.",
-    "line": 64,
-    "column": 25
+    "check": "Unsafe setTimeout",
+    "message": "Potential security risk: setTimeout with string argument detected.",
+    "line": 25,
+    "column": 4
   },
   {
     "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/App.js",
-    "check": "Direct DOM Manipulation",
-    "message": "Potential security risk: Direct DOM manipulation detected.",
-    "line": 66,
+    "check": "Dynamic Script Injection",
+    "message": "Potential security risk: Dynamic script src assignment detected.",
+    "line": 65,
     "column": 10
-  },
-  {
-    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my-react-app/src/index.js",
-    "check": "Direct DOM Manipulation",
-    "message": "Potential security risk: Direct DOM manipulation detected.",
-    "line": 7,
-    "column": 33
   }
 ]

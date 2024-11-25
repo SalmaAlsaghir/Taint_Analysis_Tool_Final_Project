@@ -1,0 +1,23 @@
+[
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/django_test_suite/edge_cases/indirect_tainting.py",
+    "check": "SQL Injection",
+    "message": "Potential SQL Injection detected due to tainted query string.",
+    "line": 13,
+    "column": 4
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/django_test_suite/xss/vulnerable_xss.py",
+    "check": "XSS",
+    "message": "Potential XSS detected.",
+    "line": 7,
+    "column": 15
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/django_test_suite/sql_injection/vulnerable_sql.py",
+    "check": "SQL Injection",
+    "message": "Potential SQL Injection detected due to tainted query string.",
+    "line": 11,
+    "column": 4
+  }
+]

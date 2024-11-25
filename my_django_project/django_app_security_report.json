@@ -1,0 +1,30 @@
+[
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my_django_project/vulnerabilities/views.py",
+    "check": "SQL Injection",
+    "message": "Potential SQL Injection detected due to tainted query string.",
+    "line": 13,
+    "column": 8
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my_django_project/vulnerabilities/views.py",
+    "check": "XSS",
+    "message": "Potential XSS detected.",
+    "line": 17,
+    "column": 15
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my_django_project/vulnerabilities/views.py",
+    "check": "Command Injection",
+    "message": "Potential Command Injection detected.",
+    "line": 20,
+    "column": 4
+  },
+  {
+    "file": "/Users/salmaalsaghir/Desktop/taint-analysis-tool/my_django_project/vulnerabilities/views.py",
+    "check": "Insecure Deserialization",
+    "message": "Potential Insecure Deserialization detected.",
+    "line": 23,
+    "column": 11
+  }
+]

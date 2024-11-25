@@ -1,65 +1,107 @@
 const fs = require('fs');
 const path = require('path');
-const babelParser = require('@babel/parser');
+const { parse } = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
 const esquery = require('esquery');
+
+// List of known sanitization functions
+const sanitizationFunctions = ['DOMPurify.sanitize', 'sanitizeHtml', 'escapeHtml'];
 
 // Function to analyze a single React file
 function analyzeReactFile(filePath) {
     const code = fs.readFileSync(filePath, 'utf-8');
 
     // Parse the file using Babel parser with JSX support
-    const ast = babelParser.parse(code, {
+    const ast = parse(code, {
         sourceType: 'module',
         plugins: ['jsx', 'typescript', 'classProperties'],
     });
 
     const taintedVars = new Set();
-    const stateVars = new Map(); // Map of state variable names to their setter functions
+    const stateVars = new Map(); // Map of setter functions to state variable names
     const results = [];
 
     // First, perform taint analysis using traversal
     traverse(ast, {
         // Identify useState hooks and state variables
         VariableDeclarator(path) {
+            const id = path.node.id;
             const init = path.node.init;
+
+            // Handle useState
             if (
                 init &&
                 init.type === 'CallExpression' &&
                 init.callee.name === 'useState'
             ) {
-                const stateVar = path.node.id.elements[0].name;
-                const setterVar = path.node.id.elements[1].name;
+                const stateVar = id.elements[0].name;
+                const setterVar = id.elements[1].name;
                 stateVars.set(setterVar, stateVar);
+            }
+
+            // Propagate taint through variable declarations
+            else if (init && isTainted(init, taintedVars)) {
+                const varName = id.name;
+                taintedVars.add(varName);
             }
         },
 
-        // Identify assignments from event.target.value (taint sources)
+        // Identify assignments and propagate taint
         AssignmentExpression(path) {
             const left = path.node.left;
             const right = path.node.right;
 
+            // If RHS is tainted, LHS becomes tainted
+            if (isTainted(right, taintedVars)) {
+                const varName = getAssignedVarName(left);
+                if (varName) {
+                    taintedVars.add(varName);
+                }
+            }
+
+            // If RHS is a taint source (event.target.value)
             if (isEventTargetValue(right)) {
-                if (left.type === 'Identifier') {
-                    taintedVars.add(left.name);
-                } else if (left.type === 'MemberExpression') {
-                    const varName = getMemberExpressionName(left);
-                    if (varName) {
-                        taintedVars.add(varName);
-                    }
+                const varName = getAssignedVarName(left);
+                if (varName) {
+                    taintedVars.add(varName);
                 }
             }
         },
 
-        // Handle calls to state setter functions
+        // Handle calls to functions
         CallExpression(path) {
             const callee = path.node.callee;
             const args = path.node.arguments;
 
+            // Handle calls to state setter functions
             if (callee.type === 'Identifier' && stateVars.has(callee.name)) {
                 const stateVar = stateVars.get(callee.name);
-                if (args.length > 0 && (isTainted(args[0], taintedVars) || isEventTargetValue(args[0]))) {
-                    taintedVars.add(stateVar);
+                if (args.length > 0) {
+                    if (isTainted(args[0], taintedVars) || isEventTargetValue(args[0])) {
+                        taintedVars.add(stateVar);
+                    } else if (isSanitizationCall(args[0])) {
+                        // Remove from taintedVars if sanitized
+                        taintedVars.delete(stateVar);
+                    }
+                }
+            }
+
+            // Propagate taint through function calls (simplified)
+            else if (callee.type === 'Identifier') {
+                const funcName = callee.name;
+                // If function is known to sanitize, remove taint
+                if (sanitizationFunctions.includes(funcName)) {
+                    const varName = getAssignedVarName(path.parent);
+                    if (varName && taintedVars.has(varName)) {
+                        taintedVars.delete(varName);
+                    }
+                }
+                // For simplicity, assume functions return tainted data if any argument is tainted
+                else {
+                    const varName = getAssignedVarName(path.parent);
+                    if (varName && args.some(arg => isTainted(arg, taintedVars))) {
+                        taintedVars.add(varName);
+                    }
                 }
             }
         },
@@ -81,9 +123,21 @@ function analyzeReactFile(filePath) {
         },
         {
             name: "Direct DOM Manipulation",
-            query: `MemberExpression[object.name=/window|document/]`,
+            query: `AssignmentExpression[left.object.name=/window|document/]`,
             message: "Potential security risk: Direct DOM manipulation detected.",
+            checkTainted: true, // Now check for tainted data
+        },
+        {
+            name: "Unsafe setTimeout",
+            query: `CallExpression[callee.name="setTimeout"]`,
+            message: "Potential security risk: setTimeout with string argument detected.",
             checkTainted: false,
+        },
+        {
+            name: "Dynamic Script Injection",
+            query: `AssignmentExpression[left.property.name="src"]`,
+            message: "Potential security risk: Dynamic script src assignment detected.",
+            checkTainted: true,
         },
         // Add more queries as needed
     ];
@@ -103,6 +157,19 @@ function analyzeReactFile(filePath) {
                 } else if (match.type === 'JSXAttribute' && match.value && match.value.expression) {
                     // For dangerouslySetInnerHTML
                     isVulnerable = isTainted(match.value.expression, taintedVars);
+                } else if (match.type === 'AssignmentExpression') {
+                    // For assignments, check if RHS is tainted
+                    isVulnerable = isTainted(match.right, taintedVars);
+                }
+            } else {
+                // For setTimeout with string argument
+                if (check.name === "Unsafe setTimeout") {
+                    const firstArg = match.arguments[0];
+                    if (firstArg.type === 'StringLiteral' || (firstArg.type === 'Literal' && typeof firstArg.value === 'string')) {
+                        isVulnerable = true;
+                    } else {
+                        isVulnerable = false;
+                    }
                 }
             }
 
@@ -131,10 +198,22 @@ function isEventTargetValue(node) {
         node.type === 'MemberExpression' &&
         node.object.type === 'MemberExpression' &&
         node.object.object.type === 'Identifier' &&
-        node.object.object.name === 'event' &&
+        ['event', 'e'].includes(node.object.object.name) &&
         node.object.property.name === 'target' &&
         node.property.name === 'value'
     );
+}
+
+function getAssignedVarName(node) {
+    if (!node) return null;
+    if (node.type === 'Identifier') {
+        return node.name;
+    } else if (node.type === 'MemberExpression') {
+        return getMemberExpressionName(node);
+    } else if (node.type === 'VariableDeclarator') {
+        return node.id.name;
+    }
+    return null;
 }
 
 function getMemberExpressionName(node) {
@@ -146,6 +225,23 @@ function getMemberExpressionName(node) {
     return null;
 }
 
+function isSanitizationCall(node) {
+    if (node.type === 'CallExpression') {
+        const calleeName = getFullCalleeName(node.callee);
+        return sanitizationFunctions.includes(calleeName);
+    }
+    return false;
+}
+
+function getFullCalleeName(callee) {
+    if (callee.type === 'Identifier') {
+        return callee.name;
+    } else if (callee.type === 'MemberExpression') {
+        return `${getFullCalleeName(callee.object)}.${callee.property.name}`;
+    }
+    return '';
+}
+
 function isTainted(node, taintedVars) {
     if (!node) return false;
     if (node.type === 'Identifier') {
@@ -153,6 +249,11 @@ function isTainted(node, taintedVars) {
     } else if (node.type === 'MemberExpression') {
         return isTainted(node.object, taintedVars);
     } else if (node.type === 'CallExpression') {
+        // If the call is to a sanitization function, return false
+        if (isSanitizationCall(node)) {
+            return false;
+        }
+        // Assume function returns tainted data if any argument is tainted
         return node.arguments.some(arg => isTainted(arg, taintedVars));
     } else if (node.type === 'BinaryExpression' || node.type === 'LogicalExpression') {
         return isTainted(node.left, taintedVars) || isTainted(node.right, taintedVars);
@@ -162,13 +263,16 @@ function isTainted(node, taintedVars) {
         return node.properties.some(prop => isTainted(prop.value, taintedVars));
     } else if (node.type === 'ArrayExpression') {
         return node.elements.some(el => isTainted(el, taintedVars));
+    } else if (node.type === 'Literal') {
+        return false;
+    } else if (node.type === 'TemplateLiteral') {
+        return node.expressions.some(expr => isTainted(expr, taintedVars));
     }
     return false;
 }
 
 // Function to analyze all React files in the app
-function analyzeReactApp() {
-    const directoryPath = path.join(__dirname, '../my-react-app/src'); // Adjust the path as needed
+function analyzeReactApp(directoryPath) {
     const results = [];
 
     // Recursively read files in the directory
@@ -197,7 +301,4 @@ function saveReport(results, outputFilePath) {
     console.log(`Report saved to ${outputFilePath}`);
 }
 
-// Running the analysis
-const outputReport = 'react-security-report.json'; // Path to save the report
-const results = analyzeReactApp();
-saveReport(results, outputReport);
+module.exports = { analyzeReactFile, analyzeReactApp, saveReport };
