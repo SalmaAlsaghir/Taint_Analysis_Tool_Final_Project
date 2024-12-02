@@ -38,7 +38,6 @@ The tool tracks the flow of untrusted user input through the application and det
    - For the **Django application**:
      ```bash
      cd my-django-project
-     pip install -r requirements.txt
      ```
 
 3. **Install Taint Analysis Tool Dependencies**:
@@ -46,16 +45,15 @@ The tool tracks the flow of untrusted user input through the application and det
 
    ```bash
    cd tool
-   pip install -r requirements.txt
    ```
 
 ## Usage
 
 1. **Running the React Application Analysis**:
-   After installing the dependencies, you can run the tool on the React application code.
+   After installing the dependencies, you can run the tool on the React application code using Node.js:
 
    ```bash
-   python analyzeReact.py --path ../my-react-app
+   node analyzeReact.js --path ../my-react-app
    ```
 
 2. **Running the Django Application Analysis**:
@@ -84,12 +82,27 @@ Taint_Analysis_Tool_Final_Project/
 ├── django-test-suite/       # Test cases for Django
 │
 ├── tool/                    # Taint analysis tool scripts
-│   ├── analyzeReact.py      # React analysis script
-│   ├── analyzeDjango.py     # Django analysis script
-│   └── requirements.txt     # Python dependencies for the tool
+│   ├── analyzeReact.js      # React analysis script (Node.js)
+│   ├── analyzeDjango.py     # Django analysis script (Python)
+│   ├── run_react_app_analysis.js  # React app analysis helper (Node.js)
+│   ├── run_django_app_analysis.py  # Django app analysis helper (Python)
+│   ├── run_react_tests.js   # React test suite execution (Node.js)
+│   ├── run_django_tests.py  # Django test suite execution (Python)
+│        
 ├── README.md                # This file
-└── requirements.txt         # General dependencies for the project
 ```
+
+### Files in the `tool/` folder:
+- **`analyzeReact.js`**: Analyzes the React application code for security vulnerabilities like XSS and SQL Injection.
+- **`analyzeDjango.py`**: Analyzes the Django application code for vulnerabilities like SQL Injection and Command Injection.
+
+- **`run_react_app_analysis.js`**: Helper script that facilitates the analysis of the React application code by running the `analyzeReact.js` script on the specified React project directory.
+- **`run_django_app_analysis.py`**: Helper script that facilitates the analysis of the Django application code by running the `analyzeDjango.py` script on the specified Django project directory.
+
+- **`run_react_tests.js`**: Executes the React test suite, running tests designed to detect security flaws in the React application.
+- **`run_django_tests.py`**: Executes the Django test suite, running tests designed to detect security flaws in the Django application.
+
+These helper scripts make it easier to run the analysis and tests without directly interacting with the core analysis scripts.
 
 ## Vulnerabilities Detected
 
@@ -108,7 +121,7 @@ Contributions to this project are welcome. If you'd like to improve the taint an
 1. Fork the repository.
 2. Clone your fork to your local machine:
    ```bash
-   git clone https://github.com/yourusername/Taint_Analysis_Tool_Final_Project.git
+   git clone https://github.com/SalmaAlsaghir/Taint_Analysis_Tool_Final_Project.git
    ```
 3. Create a new branch:
    ```bash
@@ -129,4 +142,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Like this project?** Star the repository on GitHub and feel free to open an issue if you encounter bugs or have feature suggestions.
 
 ```
-
